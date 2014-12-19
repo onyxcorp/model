@@ -1,0 +1,27 @@
+{
+  "name": "model",
+  "version": "1.0.0",
+  "description": "Management tool for javascript models based on Backbone.model",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/onyxcorp/model.git"
+  },
+  "keywords": [
+    "model",
+    "backbone"
+  ],
+  "author": "fabio zaffani",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/onyxcorp/model/issues"
+  },
+  "homepage": "https://github.com/onyxcorp/model",
+  "dependencies": {
+    "jsonschema": "^1.0.0",
+    "lodash-node": "^2.4.1"
+  }
+}
