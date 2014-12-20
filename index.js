@@ -332,6 +332,7 @@ lodash.collections.forEach(['transform', 'values', 'pairs', 'invert', 'pick', 'o
 });
 
 // this is the same extend used in backbone
+// same extend function used by backbone
 Model.extend = function(protoProps, staticProps) {
     var parent,
         child,
@@ -342,7 +343,7 @@ Model.extend = function(protoProps, staticProps) {
     // The constructor function for the new subclass is either defined by you
     // (the "constructor" property in your `extend` definition), or defaulted
     // by us to simply call the parent's constructor.
-    if (protoProps && _.has(protoProps, 'constructor')) {
+    if (protoProps && lodash.objects.has(protoProps, 'constructor')) {
         child = protoProps.constructor;
     } else {
         child = function () {
@@ -351,7 +352,7 @@ Model.extend = function(protoProps, staticProps) {
     }
 
     // Add static properties to the constructor function, if supplied.
-    _.assign(child, parent, staticProps);
+    lodash.objects.assign(child, parent, staticProps);
 
     // Set the prototype chain to inherit from `parent`, without calling
     // `parent`'s constructor function.
@@ -363,7 +364,7 @@ Model.extend = function(protoProps, staticProps) {
 
     // Add prototype properties (instance properties) to the subclass,
     // if supplied.
-    if (protoProps) _.assign(child.prototype, protoProps);
+    if (protoProps) lodash.objects.assign(child.prototype, protoProps);
 
     // Set a convenience property in case the parent's prototype is needed
     // later.
