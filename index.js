@@ -12,8 +12,8 @@ var lodash = {
         utils: require('lodash-node/modern/utilities')
     },
     SchemaValidator = require('jsonschema').Validator,
-    Formatter = require('./Formatter'),
-    Transmutator = require('./Transmutator'),
+    Formatter = require('formatter'),
+    Transmuter = require('transmuter'),
     debug = function (message) { console.log(message); },
     ModelValidator;
 
@@ -58,6 +58,10 @@ var Model = function(attributes, options) {
 // Attach all inheritable methods to the Model prototype.
 lodash.objects.assign(Model.prototype, {
 
+    // Holds any custom method that can be used to validate the attributes of the model
+    // The function must return empty for the attribute to be considered valid
+    _validTypes: {},
+
     // A hash of attributes whose current and previous value differ.
     changed: null,
 
@@ -78,7 +82,7 @@ lodash.objects.assign(Model.prototype, {
 
     // Return a copy of the model attribute as a JSON string
     toJSON: function () {
-        Transmutator.toJSONString(lodash.objects.cloneDeep(this.attributes));
+        Transmuter.toJSONString(lodash.objects.cloneDeep(this.attributes));
     },
 
     // Returns `true` if the attribute contains a value that is not null
@@ -109,7 +113,9 @@ lodash.objects.assign(Model.prototype, {
     // initially set
     // For a list of all available methods check utils/Formatter.js
     to: function (type, attr) {
+
         type = Formatter.camelize(type);
+
         // crate array from arguments
         var args = [].slice.call(arguments);
 
@@ -121,13 +127,13 @@ lodash.objects.assign(Model.prototype, {
         // set the attribute to change as the first element on the array
         args.unshift(this.attributes[attr]);
 
-        if (Formatter[type]) {
-            return Formatter[type].apply(null, args);
-        } else if (this[type]) {
+        if (this[type]) {
             // make sure the context in the called function is the current object
             return this[type].apply(this, args);
+        } else if (Formatter[type]) {
+            return Formatter[type].apply(null, args);
         } else {
-            debug('Transmutation type not found: ' + type + '. This is a camelized version');
+            debug('Formatter function not found: ' + type + '.');
         }
     },
 
@@ -306,7 +312,7 @@ lodash.objects.assign(Model.prototype, {
             }
         }
 
-        return Transmutator.toBoolean(this.validationError);
+        return Transmuter.toBoolean(this.validationError);
     },
 
     _previousAttributes : {}
@@ -325,6 +331,45 @@ lodash.collections.forEach(['transform', 'values', 'pairs', 'invert', 'pick', 'o
     };
 });
 
-Model.extend = extend;
+// this is the same extend used in backbone
+Model.extend = function(protoProps, staticProps) {
+    var parent,
+        child,
+        Surrogate;
+
+    parent = this;
+
+    // The constructor function for the new subclass is either defined by you
+    // (the "constructor" property in your `extend` definition), or defaulted
+    // by us to simply call the parent's constructor.
+    if (protoProps && _.has(protoProps, 'constructor')) {
+        child = protoProps.constructor;
+    } else {
+        child = function () {
+            return parent.apply(this, arguments);
+        };
+    }
+
+    // Add static properties to the constructor function, if supplied.
+    _.assign(child, parent, staticProps);
+
+    // Set the prototype chain to inherit from `parent`, without calling
+    // `parent`'s constructor function.
+    Surrogate = function () {
+        this.constructor = child;
+    };
+    Surrogate.prototype = parent.prototype;
+    child.prototype = new Surrogate;
+
+    // Add prototype properties (instance properties) to the subclass,
+    // if supplied.
+    if (protoProps) _.assign(child.prototype, protoProps);
+
+    // Set a convenience property in case the parent's prototype is needed
+    // later.
+    child.__super__ = parent.prototype;
+
+    return child;
+};
 
 module.exports = Model;
