@@ -34,7 +34,7 @@ var Model = function(attributes, options) {
     // if options is empty create an empty object literal
     options = options || {};
     // set an unique id for this model
-    this.cid = lodash.util.uniqueId('c');
+    this.cid = lodash.utils.uniqueId('c');
     this.attributes = {};
 
     // save a reference to the collection this model belongsTo
@@ -43,7 +43,7 @@ var Model = function(attributes, options) {
     }
 
     // ovewrite the default values with the ones passed in the attributes
-    attrs = lodash.objects.defaults({}, attrs, lodash.util.result(this, 'defaults'));
+    attrs = lodash.objects.defaults({}, attrs, lodash.utils.result(this, 'defaults'));
 
     // set the data in the model
     this.set(attrs, options);
