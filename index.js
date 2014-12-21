@@ -82,7 +82,7 @@ lodash.objects.assign(Model.prototype, {
 
     // Return a copy of the model attribute as a JSON string
     toJSON: function () {
-        Transmuter.toJSONString(lodash.objects.cloneDeep(this.attributes));
+        return Transmuter.toJSONString(lodash.objects.cloneDeep(this.attributes));
     },
 
     // Returns `true` if the attribute contains a value that is not null
@@ -312,7 +312,7 @@ lodash.objects.assign(Model.prototype, {
             }
         }
 
-        return Transmuter.toBoolean(this.validationError);
+        return !Transmuter.toBoolean(this.validationError);
     },
 
     _previousAttributes : {}
