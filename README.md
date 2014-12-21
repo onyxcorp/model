@@ -1,5 +1,4 @@
 # Model
----
 
 Model is module created to help manage data with Javascript. It is based on
 Backbone.model. It was primarely created to be used in the Flux architecture.
@@ -13,7 +12,7 @@ and how it should be done with the server;
 * Completely differente validation system, this model is used toghether with [jsonschema module](https://www.npmjs.com/package/jsonschema "jsonschema"), in order to allow for better validation and control of data
 
 ## Methods/attributes overview
----
+
 ### Attributes
 * _validTypes
 * changed
