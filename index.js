@@ -187,7 +187,7 @@ lodash.objects.assign(Model.prototype, {
         options = lodash.objects.defaults({}, options, defaultOptions);
 
         // perform a check on current model schema with the attributes passed
-        if (!this._checkSchema(attrs)) {
+        if (!this.checkSchema(attrs)) {
             return false;
         }
 
@@ -278,11 +278,11 @@ lodash.objects.assign(Model.prototype, {
 
     // Check if the model is currently in a valid state.
     isValid: function () {
-        return this._checkSchema();
+        return !Transmuter.toBoolean(this.validationError);
     },
 
     // check if the attributes passed match with the model schema
-    _checkSchema: function (attrs) {
+    checkSchema: function (attrs) {
 
         var validatorResult,
             difference;
@@ -303,7 +303,7 @@ lodash.objects.assign(Model.prototype, {
             difference = lodash.arrays.difference(lodash.objects.keys(attrs), lodash.objects.keys(this._schema.properties));
             if (!lodash.objects.isEmpty(difference)) {
                 // check if all the attrs are correctly set in the schema
-                this.validationError = 'You tryed to set attributes that are not described on the _schema';
+                this.validationError = 'You tryed to set attributes that are not described on the _schema:' + difference.toString();
             } else { // everything is ok, perform a validation
                 validatorResult = ModelValidator.validate(attrs, this._schema);
                 if (!validatorResult.valid) {
@@ -312,7 +312,7 @@ lodash.objects.assign(Model.prototype, {
             }
         }
 
-        return !Transmuter.toBoolean(this.validationError);
+        return this.isValid();
     },
 
     _previousAttributes : {}
