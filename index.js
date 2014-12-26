@@ -88,7 +88,7 @@ lodash.objects.assign(Model.prototype, {
     // Returns `true` if the attribute contains a value that is not null
     // or undefined.
     has: function (attr) {
-        return this.get(attr) !== null;
+        return this.get(attr) != null;
     },
 
     // Returns data from an attribute that matches the current search
@@ -151,9 +151,13 @@ lodash.objects.assign(Model.prototype, {
     // Get the value of an attribute.
     get: function (attr) {
         if (this._schema.properties[attr]) {
+            // even if there is no attribute we cant send other values
+            // like if there is no id send the cid would cause problems since
+            // using this.has('id') would make the model think it have the attribute
+            // or that it's not a new model (when using isNew)
             return this.attributes[attr];
         } else {
-            debug('Maybe you set the attribute: ' + attr + ' but forgot to declare it on the _schema');
+            debug('The attribute ' + attr + ' was not found declared in the _schema');
         }
     },
 
@@ -171,7 +175,7 @@ lodash.objects.assign(Model.prototype, {
             defaultOptions;
 
         // just leave if there is no key
-        if (key === null) return this;
+        if (key == null) return this;
 
         // Handle both 'key, value, option' or and '{key: value}, option' -style arguments.
         if (typeof key === 'object') {
@@ -229,6 +233,10 @@ lodash.objects.assign(Model.prototype, {
             }
         }
 
+        if (this.collection) {
+            this.collection.modelUpdate(this);
+        }
+
         return this;
     },
 
@@ -254,7 +262,7 @@ lodash.objects.assign(Model.prototype, {
     // Determine if the model has changed since the last changed event
     // If you specify an attribute name, determine if that attribute has changed.
     hasChanged: function(attr) {
-        if (attr === null) {
+        if (attr == null) {
             return !lodash.objects.isEmpty(this.changed);
         }
         return lodash.objects.has(this.changed, attr);
@@ -263,7 +271,7 @@ lodash.objects.assign(Model.prototype, {
     // Get the previous value of an attribute, recorded at the time the last
     // time the attribute was changed
     previous: function (attr) {
-        if (attr === null || !this._previousAttributes) {
+        if (attr == null || !this._previousAttributes) {
             return null;
         }
         return this._previousAttributes[attr];
