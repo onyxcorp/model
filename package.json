@@ -23,7 +23,7 @@
   "dependencies": {
     "transmuter": "git+https://github.com/onyxcorp/transmuter",
     "formatter": "git+https://github.com/onyxcorp/formatter",
-    "jsonschema": "^1.0.0",
-    "lodash-node": "^2.4.1"
+    "lodash-node": "git+https://github.com/lodash/lodash-node.git#2.4.1",
+    "jsonschema": "^1.0.0"
   }
 }
