@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/onyxcorp/model",
   "dependencies": {
+    "backbone-extend-standalone": "git+https://github.com/gre/backbone-extend-standalone",
     "transmuter": "git+https://github.com/onyxcorp/transmuter",
     "formatter": "git+https://github.com/onyxcorp/formatter",
     "lodash-node": "git+https://github.com/lodash/lodash-node.git#2.4.1",

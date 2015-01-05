@@ -14,6 +14,7 @@ var lodash = {
     SchemaValidator = require('jsonschema').Validator,
     Formatter = require('formatter'),
     Transmuter = require('transmuter'),
+    extend = require('backbone-extend-standalone'),
     debug = function (message) { console.log(message); },
     ModelValidator;
 
@@ -76,7 +77,7 @@ lodash.objects.assign(Model.prototype, {
     // initialization logic.
     initialize: function () {
         if (!this._schema) {
-            debug('You forgot to set the schema for this model');
+            debug('You forgot to set a _schema for the model');
         }
     },
 
@@ -107,10 +108,9 @@ lodash.objects.assign(Model.prototype, {
     },
 
     // How the data should be send when "get" is used. It's worth mentioning that
-    // this method should never perform data transmutation. It should only format
-    // it so careful when extending and formatting the data locally.
-    // The data should always be send throught the get with the same type it was
-    // initially set
+    // this method should never perform data transmutation, it should only format
+    // it and never change it's type so the data will always be send throught the
+    // get with the same type it was initially set
     // For a list of all available methods check utils/Formatter.js
     to: function (type, attr) {
 
@@ -133,7 +133,7 @@ lodash.objects.assign(Model.prototype, {
         } else if (Formatter[type]) {
             return Formatter[type].apply(null, args);
         } else {
-            debug('Formatter function not found: ' + type + '.');
+            debug('Formatting function not found: ' + type + '.');
         }
     },
 
@@ -157,7 +157,7 @@ lodash.objects.assign(Model.prototype, {
             // or that it's not a new model (when using isNew)
             return this.attributes[attr];
         } else {
-            debug('The attribute ' + attr + ' was not found declared in the _schema');
+            debug('Trying to get the attribute ' + attr + ' but it was not found at the current model _schema');
         }
     },
 
@@ -306,12 +306,12 @@ lodash.objects.assign(Model.prototype, {
 
         // check if everything was correctly set in the _schema
         if (!this._schema) {
-            this.validationError = 'You must set a _schema for the model, otherwise it will only validate as false';
+            this.validationError = 'You must set a _schema for this model, otherwise validate will always return false';
         } else {
             difference = lodash.arrays.difference(lodash.objects.keys(attrs), lodash.objects.keys(this._schema.properties));
             if (!lodash.objects.isEmpty(difference)) {
                 // check if all the attrs are correctly set in the schema
-                this.validationError = 'You tryed to set attributes that are not described on the _schema:' + difference.toString();
+                this.validationError = 'You are trying to set attributes that are not described on the _schema:' + difference.toString();
             } else { // everything is ok, perform a validation
                 validatorResult = ModelValidator.validate(attrs, this._schema);
                 if (!validatorResult.valid) {
@@ -319,12 +319,9 @@ lodash.objects.assign(Model.prototype, {
                 }
             }
         }
-
         return this.isValid();
     },
-
     _previousAttributes : {}
-
 });
 
 // Lodash methods that we want to implement on the Model.
@@ -341,44 +338,6 @@ lodash.collections.forEach(['transform', 'values', 'pairs', 'invert', 'pick', 'o
 
 // this is the same extend used in backbone
 // same extend function used by backbone
-Model.extend = function(protoProps, staticProps) {
-    var parent,
-        child,
-        Surrogate;
-
-    parent = this;
-
-    // The constructor function for the new subclass is either defined by you
-    // (the "constructor" property in your `extend` definition), or defaulted
-    // by us to simply call the parent's constructor.
-    if (protoProps && lodash.objects.has(protoProps, 'constructor')) {
-        child = protoProps.constructor;
-    } else {
-        child = function () {
-            return parent.apply(this, arguments);
-        };
-    }
-
-    // Add static properties to the constructor function, if supplied.
-    lodash.objects.assign(child, parent, staticProps);
-
-    // Set the prototype chain to inherit from `parent`, without calling
-    // `parent`'s constructor function.
-    Surrogate = function () {
-        this.constructor = child;
-    };
-    Surrogate.prototype = parent.prototype;
-    child.prototype = new Surrogate;
-
-    // Add prototype properties (instance properties) to the subclass,
-    // if supplied.
-    if (protoProps) lodash.objects.assign(child.prototype, protoProps);
-
-    // Set a convenience property in case the parent's prototype is needed
-    // later.
-    child.__super__ = parent.prototype;
-
-    return child;
-};
+Model.extend = extend;
 
 module.exports = Model;
