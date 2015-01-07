@@ -15,7 +15,6 @@ var lodash = {
     Formatter = require('formatter'),
     Transmuter = require('transmuter'),
     extend = require('backbone-extend-standalone'),
-    debug = function (message) { console.log(message); },
     ModelValidator;
 
 ModelValidator = new SchemaValidator();
@@ -77,7 +76,7 @@ lodash.objects.assign(Model.prototype, {
     // initialization logic.
     initialize: function () {
         if (!this._schema) {
-            debug('You forgot to set a _schema for the model');
+            throw new Error('You forgot to set a _schema for the model', 'index.js', 80);
         }
     },
 
@@ -103,7 +102,7 @@ lodash.objects.assign(Model.prototype, {
         if (!lodash.objects.isNumber(attribute)) {
             return lodash.collections[first ? 'find' : 'filter'](this.attributes[attr], data);
         } else {
-            debug('Find can only be performed on String, Array or Object type attribute');
+            throw new Error('Find can only be performed on String, Array or Object type attribute', 'index.js', 106);
         }
     },
 
@@ -133,7 +132,7 @@ lodash.objects.assign(Model.prototype, {
         } else if (Formatter[type]) {
             return Formatter[type].apply(null, args);
         } else {
-            debug('Formatting function not found: ' + type + '.');
+            throw new Error('Formatting function not found: ' + type + '.', 'index.js', 135);
         }
     },
 
@@ -157,7 +156,7 @@ lodash.objects.assign(Model.prototype, {
             // or that it's not a new model (when using isNew)
             return this.attributes[attr];
         } else {
-            debug('Trying to get the attribute ' + attr + ' but it was not found at the current model _schema');
+            throw new Error('Trying to get the attribute: ' + attr + ', but it was not found at the current model _schema', 'index.js', 160);
         }
     },
 
@@ -304,14 +303,13 @@ lodash.objects.assign(Model.prototype, {
         // also works as a defensive copy to avoid overriding the root data
         attrs = lodash.objects.assign({}, this.attributes, attrs);
 
-        // check if everything was correctly set in the _schema
+        // there is a valid _schema?
         if (!this._schema) {
-            this.validationError = 'You must set a _schema for this model, otherwise validate will always return false';
-        } else {
+            throw new Error('You must set a _schema for this model, otherwise validate will always return false', 'index.js', 309);
+        } else { // check if the property being set set is correctly declared at the _schema attribute
             difference = lodash.arrays.difference(lodash.objects.keys(attrs), lodash.objects.keys(this._schema.properties));
             if (!lodash.objects.isEmpty(difference)) {
-                // check if all the attrs are correctly set in the schema
-                this.validationError = 'You are trying to set attributes that are not described on the _schema:' + difference.toString();
+                throw new Error('You are trying to set attributes that are not described on the model _schema:' + difference.toString(), 'index.js', 313);
             } else { // everything is ok, perform a validation
                 validatorResult = ModelValidator.validate(attrs, this._schema);
                 if (!validatorResult.valid) {
