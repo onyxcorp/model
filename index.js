@@ -29,10 +29,13 @@ ModelValidator = new SchemaValidator();
 // Create a new model with the specified attributes. A client id (`cid`)
 // is automatically generated and assigned for you.
 var Model = function(attributes, options) {
+
     // defensive copying (make sure we don't change the attributes origin)
     var attrs = attributes || {};
+
     // if options is empty create an empty object literal
     options = options || {};
+
     // set an unique id for this model
     this.cid = lodash.utils.uniqueId('c');
     this.attributes = {};
@@ -62,6 +65,9 @@ lodash.objects.assign(Model.prototype, {
     // The function must return empty for the attribute to be considered valid
     _validTypes: {},
 
+    // set a initial null _schema
+    _schema: null,
+
     // A hash of attributes whose current and previous value differ.
     changed: null,
 
@@ -71,6 +77,9 @@ lodash.objects.assign(Model.prototype, {
     // The default name for the JSON `id` attribute is `"id"`. MongoDB and
     // CouchDB users may want to set this to `"_id"`.
     idAttribute: 'id',
+
+    // naming classes
+    className: 'Model',
 
     // Initialize is an empty function by default. Override it with your own
     // initialization logic.
